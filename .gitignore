@@ -1,0 +1,23 @@
+.env
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Runtime data
+/data/raw/
+/data/normalized/
+/data/evidence/
+/data/runs/
+/data/*.sqlite3
+/data/*.sqlite3-*
+/logs/
+/.dryrun/
+
+# Local secrets/private material
+/secrets/
+/private/
