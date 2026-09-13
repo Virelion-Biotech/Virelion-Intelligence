@@ -1,26 +1,34 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from difflib import SequenceMatcher
 
-from .normalize import canonical_publication_key, normalize_title
+from .models import PaperRecord
+from .normalize import canonical_title, normalize_doi, normalize_pmid
 
 
 @dataclass(frozen=True)
-class DedupeCandidate:
-    key: str
-    title: str
-    doi: str | None = None
-    pmid: str | None = None
+class DuplicateDecision:
+    duplicate: bool
+    basis: str
+    matched_id: str | None = None
+    similarity: float = 0.0
 
 
-def deduplicate(records: list[DedupeCandidate]) -> tuple[list[DedupeCandidate], dict[str, list[str]]]:
-    """Exact DOI/PMID/title-key deduplication; preserves first occurrence."""
-    seen: dict[str, DedupeCandidate] = {}
-    duplicates: dict[str, list[str]] = {}
-    for record in records:
-        key = canonical_publication_key(record.title, record.doi, record.pmid)
-        if key in seen:
-            duplicates.setdefault(key, []).append(record.key)
-        else:
-            seen[key] = record
-    return list(seen.values()), duplicates
+def dedupe_against(candidate: PaperRecord, existing: list[PaperRecord], threshold: float = 0.94) -> DuplicateDecision:
+    doi = normalize_doi(candidate.doi)
+    pmid = normalize_pmid(candidate.pmid)
+    title = canonical_title(candidate.title)
+    for item in existing:
+        if doi and normalize_doi(item.doi) == doi:
+            return DuplicateDecision(True, "doi", item.paper_id, 1.0)
+        if pmid and normalize_pmid(item.pmid) == pmid:
+            return DuplicateDecision(True, "pmid", item.paper_id, 1.0)
+    best: tuple[float, PaperRecord] | None = None
+    for item in existing:
+        score = SequenceMatcher(None, title, canonical_title(item.title)).ratio()
+        if best is None or score > best[0]:
+            best = (score, item)
+    if best and best[0] >= threshold:
+        return DuplicateDecision(True, "title", best[1].paper_id, best[0])
+    return DuplicateDecision(False, "none", None, best[0] if best else 0.0)
