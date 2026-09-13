@@ -21,9 +21,9 @@ class LLMClient:
         if not key:
             return None
         return cls(
-            base_url=os.getenv("VIRELION_LLM_BASE_URL", "https://api.openai.com/v1"),
+            base_url=os.getenv("VIRELION_LLM_BASE_URL") or "https://api.openai.com/v1",
             api_key=key,
-            model=os.getenv("VIRELION_LLM_MODEL", "gpt-5"),
+            model=os.getenv("VIRELION_LLM_MODEL") or "gpt-5",
         )
 
     def chat(self, messages: list[dict[str, str]], *, json_mode: bool = False) -> str:
