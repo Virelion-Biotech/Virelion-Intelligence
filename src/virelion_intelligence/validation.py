@@ -26,6 +26,8 @@ def validate_claim_evidence(claim: Claim, evidence: Evidence, source: SourceReco
         errors.append("claim/evidence/source linkage mismatch")
     if evidence.claim_id != claim.claim_id:
         errors.append("evidence claim linkage mismatch")
+    if not claim.text.strip():
+        errors.append("claim has no text")
     if not evidence.supporting_text.strip():
         errors.append("evidence has no supporting text")
     if claim.evidence_level == "E0":
@@ -35,12 +37,14 @@ def validate_claim_evidence(claim: Claim, evidence: Evidence, source: SourceReco
 
 def validate_dataset(dataset: DatasetRecord) -> list[str]:
     errors: list[str] = []
-    if dataset.identity_status in {"UNRESOLVED", "AMBIGUOUS"}:
-        errors.append("dataset identity is unresolved")
+    if dataset.identity_status in {"UNRESOLVED", "AMBIGUOUS", "REVIEW_REQUIRED"}:
+        errors.append("dataset identity is unresolved or requires review")
     if dataset.suitability_status == "ACCEPTED" and dataset.identity_status != "RESOLVED":
         errors.append("accepted dataset must have RESOLVED identity")
     if dataset.sample_count is not None and dataset.sample_count == 0:
         errors.append("dataset has zero samples")
+    if dataset.suitability_status == "ACCEPTED" and dataset.metadata_quality < 0.75:
+        errors.append("accepted dataset does not meet minimum metadata quality")
     return errors
 
 

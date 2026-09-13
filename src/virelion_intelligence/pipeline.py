@@ -14,6 +14,7 @@ from .models import PaperRecord, RunManifest, SourceRecord
 from .normalize import content_hash, normalize_doi, normalize_pmid, utc_now
 from .opportunities import make_opportunity
 from .scoring import relevance_score
+from .validation import validate_claim_evidence
 from .virelion import load_module_config, map_domains
 
 DEFAULT_QUERIES = [
@@ -69,9 +70,9 @@ def run(window_days: int = 7, db_path: str = "data/virelion_intelligence.sqlite3
     run_id = f"R-{end.strftime('%Y%m%d')}-{uuid.uuid4().hex[:8]}"
     manifest = RunManifest(run_id=run_id, pipeline_version="0.2.0", window_start=start, window_end=end, status="DISCOVERING")
     db = IntelligenceDB(db_path); llm = LLMClient.from_env()
+    adapters = [PubMedAdapter(), EuropePMCAdapter(), GEOAdapter(), ClinicalTrialsAdapter(), GitHubAdapter()]
     try:
         db.upsert_run(manifest)
-        adapters = [PubMedAdapter(), EuropePMCAdapter(), GEOAdapter(), ClinicalTrialsAdapter(), GitHubAdapter()]
         queries = query_texts or DEFAULT_QUERIES
         counts = {"raw_records": 0, "papers": 0, "duplicates": 0, "datasets": 0, "claims": 0, "evidence": 0, "opportunities": 0, "errors": 0}
         seen = db.list_papers(limit=5000); source_cache: list[SourceRecord] = []
@@ -109,6 +110,10 @@ def run(window_days: int = 7, db_path: str = "data/virelion_intelligence.sqlite3
                 source = SourceRecord(source_id=paper.paper_id, source_type="literature", title=paper.title, url=paper.url, abstract=paper.abstract, doi=paper.doi, pmid=paper.pmid, authority="primary")
             try:
                 claim, evidence = extract_from_source(source, llm)
+                validation_errors = validate_claim_evidence(claim, evidence, source)
+                if validation_errors:
+                    counts["errors"] += 1
+                    continue
                 db.upsert_claim(claim); db.upsert_evidence(evidence); counts["claims"] += 1; counts["evidence"] += 1
                 matches = map_domains(paper.domains, modules, threshold=0.0)
                 module_names = [str(m["module"]) for m in matches[:5]]
@@ -138,4 +143,8 @@ def run(window_days: int = 7, db_path: str = "data/virelion_intelligence.sqlite3
     except Exception:
         manifest.status = "FAILED"; manifest.finished_at = utc_now(); db.upsert_run(manifest); db.commit(); raise
     finally:
+        for adapter in adapters:
+            close = getattr(adapter.http, "close", None)
+            if close is not None:
+                close()
         db.close()
