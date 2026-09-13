@@ -8,6 +8,7 @@ data/*.sqlite3
 data/*.sqlite3-*
 data/raw/
 data/runs/
+data/discovery_state.json
 logs/
 private/
 cache/
