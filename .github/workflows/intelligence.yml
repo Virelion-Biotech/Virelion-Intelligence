@@ -1,0 +1,42 @@
+name: Virelion Intelligence
+
+on:
+  workflow_dispatch:
+    inputs:
+      window_days:
+        description: Lookback window in days
+        required: false
+        default: "7"
+  schedule:
+    - cron: "0 3 * * 1"
+
+permissions:
+  contents: read
+
+jobs:
+  intelligence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install
+        run: python -m pip install -e ".[dev]"
+      - name: Run discovery pipeline
+        env:
+          VIRELION_LLM_API_KEY: ${{ secrets.VIRELION_LLM_API_KEY }}
+          VIRELION_LLM_BASE_URL: ${{ vars.VIRELION_LLM_BASE_URL }}
+          VIRELION_LLM_MODEL: ${{ vars.VIRELION_LLM_MODEL }}
+          WINDOW_DAYS: ${{ inputs.window_days || '7' }}
+        run: bash scripts/run_intelligence.sh
+      - name: Validate repository integrity
+        run: python scripts/check_integrity.py --report reports/latest/intelligence.md
+      - name: Upload intelligence artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: virelion-intelligence-${{ github.run_number }}
+          path: |
+            reports/latest/intelligence.md
+            data/runs/*.json
