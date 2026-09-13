@@ -38,6 +38,7 @@ def test_retry_after_rate_limit_error(monkeypatch):
             self.n+=1; request=httpx.Request("GET",url)
             if self.n<2:return httpx.Response(429,headers={"Retry-After":"3"},request=request)
             return httpx.Response(200,json={"ok":True},request=request)
+        def close(self):pass
     http=ingest.HTTPClient(); http.client=Client(); assert http.get("https://example.org").json()["ok"] is True; assert sleeps and sleeps[0]==3; http.close()
 @pytest.mark.parametrize("adapter",[PubMedAdapter,EuropePMCAdapter,GEOAdapter,ClinicalTrialsAdapter,GitHubAdapter])
 def test_adapters_expose_close(adapter):assert callable(adapter(http=FakeHTTP([])).http.close)
