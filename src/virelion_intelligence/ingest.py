@@ -4,47 +4,37 @@ import time
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import Any
-
 import httpx
 from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_exponential
-
 from .models import DatasetRecord, SourceRecord
 from .normalize import canonical_title, content_hash, normalize_accession, normalize_doi, normalize_pmid
 from .state import DiscoveryState
 
 @dataclass(frozen=True)
 class Query:
-    text: str
-    start: datetime
-    end: datetime
-    limit: int = 50
+    text:str; start:datetime; end:datetime; limit:int=50
     @property
-    def state_key(self) -> str:
-        return f"{self.text}|{self.start.isoformat()}|{self.end.isoformat()}"
-
-class RateLimitError(RuntimeError): pass
-
+    def state_key(self)->str:return f"{self.text}|{self.start.date()}|{self.end.date()}"
+class RateLimitError(RuntimeError):pass
 class HTTPClient:
-    def __init__(self, timeout: float = 30.0, user_agent: str = "Virelion-Intelligence/0.3") -> None:
-        self.client=httpx.Client(timeout=timeout,follow_redirects=True,headers={"User-Agent":f"{user_agent} (+https://github.com/Virelion-Biotech/Virelion-Intelligence)"})
+    def __init__(self,timeout:float=30.0,user_agent:str="Virelion-Intelligence/0.3")->None:self.client=httpx.Client(timeout=timeout,follow_redirects=True,headers={"User-Agent":f"{user_agent} (+https://github.com/Virelion-Biotech/Virelion-Intelligence)"})
     @retry(retry=retry_if_exception_type((httpx.TransportError,RateLimitError)),stop=stop_after_attempt(5),wait=wait_exponential(multiplier=1,min=1,max=30),reraise=True)
     def get(self,url:str,**params:Any)->httpx.Response:
         r=self.client.get(url,params=params)
         if r.status_code==429:
-            value=r.headers.get("Retry-After")
-            try: time.sleep(min(max(float(value or 1),1),60))
-            except ValueError: time.sleep(1)
+            try:time.sleep(min(max(float(r.headers.get('Retry-After','1')),1),60))
+            except ValueError:time.sleep(1)
             raise RateLimitError(f"HTTP 429 from {url}")
-        r.raise_for_status(); return r
+        r.raise_for_status();return r
     def close(self)->None:self.client.close()
 
 class PubMedAdapter:
-    source_id="pubmed"
-    def __init__(self,http=None,state:DiscoveryState|None=None):self.http,self.state=http or HTTPClient(),state
+    source_id='pubmed'
+    def __init__(self,http=None,state=None):self.http,self.state=http or HTTPClient(),state
     def search(self,q:Query)->list[SourceRecord]:
         term=f"({q.text}) AND ({q.start.date()}[PDAT] : {q.end.date()}[PDAT])"; key=q.state_key; start=int((self.state.get(self.source_id,key).get('retstart') or 0)) if self.state else 0; ids=[]
         while len(ids)<q.limit:
-            n=min(100,q.limit-len(ids)); body=self.http.get('https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi',db='pubmed',term=term,retmode='json',retmax=n,retstart=start,sort='pub date').json(); result=body.get('esearchresult',{}); page=[str(x) for x in result.get('idlist',[])]; ids.extend(page); total=int(result.get('count',len(ids)) or len(ids)); start+=len(page)
+            n=min(100,q.limit-len(ids)); body=self.http.get('https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi',db='pubmed',term=term,retmode='json',retmax=n,retstart=start,sort='pub date').json(); result=body.get('esearchresult',{}); page=[str(x) for x in result.get('idlist',[])]; ids+=page; total=int(result.get('count',len(ids)) or len(ids)); start+=len(page)
             if self.state:self.state.set(self.source_id,key,retstart=start,total=total,complete=start>=total)
             if not page or start>=total:break
         if not ids:return []
@@ -80,16 +70,15 @@ class GEOAdapter:
     def search(self,q:Query)->list[DatasetRecord]:
         key=q.state_key; start=int((self.state.get(self.source_id,key).get('retstart') or 0)) if self.state else 0; ids=[]
         while len(ids)<q.limit:
-            n=min(100,q.limit-len(ids)); body=self.http.get('https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi',db='gds',term=q.text,retmode='json',retmax=n,retstart=start).json(); result=body.get('esearchresult',{}); page=[str(x) for x in result.get('idlist',[])]; ids.extend(page); total=int(result.get('count',len(ids)) or len(ids)); start+=len(page)
+            n=min(100,q.limit-len(ids)); body=self.http.get('https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi',db='gds',term=q.text,retmode='json',retmax=n,retstart=start).json(); result=body.get('esearchresult',{}); page=[str(x) for x in result.get('idlist',[])]; ids+=page; total=int(result.get('count',len(ids)) or len(ids)); start+=len(page)
             if self.state:self.state.set(self.source_id,key,retstart=start,total=total,complete=start>=total)
             if not page or start>=total:break
         if not ids:return []
         data=self.http.get('https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi',db='gds',id=','.join(ids),retmode='json').json().get('result',{}); out=[]
         for uid in ids:
-            item=data.get(uid,{}); acc=normalize_accession(item.get('accession')) or f'UID{uid}'; title=str(item.get('title') or '').strip(); samples=_safe_int(item.get('n_samples')); created=_parse_pubdate(item.get('pdat'))
-            notes=['Study-level discovery only; sample identity and temporal metadata require downstream GSM review.']
-            if created is None: notes.append('No reliable study date was returned; temporal acceptance remains unresolved.')
-            elif not _within_window(created,q): notes.append(f'Study date {created.date()} is outside the requested window; retained only as a review candidate.')
+            item=data.get(uid,{}); acc=normalize_accession(item.get('accession')) or f'UID{uid}'; title=str(item.get('title') or '').strip(); samples=_safe_int(item.get('n_samples')); created=_parse_pubdate(item.get('pdat')); notes=['Study-level discovery only; sample identity and temporal metadata require downstream GSM review.']
+            if created is None:notes.append('No reliable study date was returned; temporal acceptance remains unresolved.')
+            elif not _within_window(created,q):notes.append(f'Study date {created.date()} is outside the requested window; retained only as a review candidate.')
             out.append(DatasetRecord(dataset_id=f'geo:{acc}',source='GEO',accession=acc,title=title,url=f'https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc={acc}',sample_count=samples,identity_status='UNRESOLVED',suitability_status='REVIEW_REQUIRED',metadata_notes=notes))
         return out[:q.limit]
 
@@ -143,6 +132,6 @@ def _parse_pubdate(value:Any)->datetime|None:
     text=str(value).strip()
     for fmt in ('%Y-%m-%d','%Y-%m','%Y','%Y-%m-%dT%H:%M:%SZ','%Y-%m-%dT%H:%M:%S%z'):
         try:
-            dt=datetime.strptime(text,fmt); return dt.replace(tzinfo=dt.tzinfo or timezone.utc)
+            dt=datetime.strptime(text,fmt);return dt.replace(tzinfo=dt.tzinfo or timezone.utc)
         except ValueError:continue
     return None
