@@ -1,0 +1,11 @@
+report:
+  format: markdown
+  output: reports/latest/intelligence.md
+  max_research_signals: 10
+  max_datasets: 10
+  max_opportunities: 10
+
+publication:
+  require_validation: true
+  publish_runtime_database: false
+  publish_raw_source_payloads: false
