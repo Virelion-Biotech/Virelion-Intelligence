@@ -3,11 +3,12 @@
   "$id": "https://github.com/Virelion-Biotech/Virelion-Intelligence/blob/main/schemas/intelligence.schema.json",
   "title": "Virelion Intelligence Record",
   "type": "object",
-  "required": ["record_type", "record_id", "schema_version"],
+  "required": ["record_type", "record_id", "schema_version", "payload"],
   "properties": {
-    "record_type": {"type": "string", "enum": ["source", "claim", "evidence", "dataset", "opportunity", "run"]},
+    "record_type": {"type": "string", "enum": ["source", "paper", "claim", "evidence", "dataset", "opportunity", "relationship", "run"]},
     "record_id": {"type": "string", "minLength": 1},
-    "schema_version": {"type": "string", "const": "0.1"}
+    "schema_version": {"type": "string", "const": "0.2"},
+    "payload": {"type": "object"}
   },
-  "additionalProperties": true
+  "additionalProperties": false
 }
