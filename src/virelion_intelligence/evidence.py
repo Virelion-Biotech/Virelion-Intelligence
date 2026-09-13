@@ -1,33 +1,38 @@
 from __future__ import annotations
 
+import json
 import uuid
 
 from .llm import LLMClient
 from .models import Claim, Evidence, EvidenceDepth, EvidenceLevel, SourceRecord
 
-SYSTEM_PROMPT = """You are a biomedical evidence extraction engine. Never invent facts. Extract only what is explicitly supported by the provided source text. Return JSON with claims and evidence. Distinguish reported findings from interpretation and limitations."""
+SYSTEM_PROMPT = """You are a biomedical evidence extraction engine. Never invent facts. Extract only what is explicitly supported by the provided source text. Return JSON with claim and evidence objects. Distinguish reported findings from interpretation and limitations."""
 
 
 def heuristic_claim(source: SourceRecord) -> tuple[Claim, Evidence]:
     claim_id = f"C-{uuid.uuid4().hex[:12]}"
     evidence_id = f"E-{uuid.uuid4().hex[:12]}"
-    text = source.abstract or source.title
+    text = source.abstract.strip() if source.abstract and source.abstract.strip() else ""
+    # Without an abstract/full-text excerpt, a title alone is metadata rather than substantive evidence.
+    level = EvidenceLevel.E2 if text and source.source_type == "literature" and source.authority == "primary" else EvidenceLevel.E1
+    evidence_text = text or source.title.strip()
+    depth = EvidenceDepth.M1 if text else EvidenceDepth.M0
     claim = Claim(
         claim_id=claim_id,
         source_id=source.source_id,
-        text=text,
-        claim_type="source_summary",
-        evidence_level=EvidenceLevel.E2 if source.source_type == "literature" and source.authority == "primary" else EvidenceLevel.E1,
-        extraction_confidence=0.65,
+        text=evidence_text,
+        claim_type="source_summary" if text else "metadata_summary",
+        evidence_level=level,
+        extraction_confidence=0.65 if text else 0.45,
     )
     evidence = Evidence(
         evidence_id=evidence_id,
         claim_id=claim_id,
         source_id=source.source_id,
-        supporting_text=text,
-        evidence_level=claim.evidence_level,
-        evidence_depth=EvidenceDepth.M1 if source.abstract else EvidenceDepth.M0,
-        confidence=0.65,
+        supporting_text=evidence_text,
+        evidence_level=level,
+        evidence_depth=depth,
+        confidence=0.65 if text else 0.45,
     )
     return claim, evidence
 
@@ -45,7 +50,7 @@ def extract_from_source(source: SourceRecord, llm: LLMClient | None = None) -> t
     }
     data = llm.json([
         {"role": "system", "content": SYSTEM_PROMPT},
-        {"role": "user", "content": str(prompt)},
+        {"role": "user", "content": json.dumps(prompt, ensure_ascii=False)},
     ])
     claim_data = data.get("claim") or {}
     evidence_data = data.get("evidence") or {}
