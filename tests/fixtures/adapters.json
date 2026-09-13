@@ -1,0 +1,19 @@
+{
+  "pubmed_search": {"esearchresult": {"count": "2", "idlist": ["101", "102"]}},
+  "pubmed_summary": {"result": {
+    "101": {"title": "Cardiac regeneration after infarction", "pubdate": "2026-09-10", "fulljournalname": "Journal of Cardiology", "authors": [{"name": "Doe A"}]},
+    "102": {"title": "Old cardiac study", "pubdate": "2025-01-01", "fulljournalname": "Old Journal", "authors": []}
+  }},
+  "europe_pmc": {"hitCount": 2, "resultList": {"result": [
+    {"pmid": "101", "doi": "10.1000/TEST", "title": "Cardiac regeneration after infarction", "firstPublicationDate": "2026-09-10", "journalTitle": "Journal of Cardiology", "authorString": "Doe A", "abstractText": "Primary result."},
+    {"pmid": "103", "title": "Older study", "firstPublicationDate": "2024-01-01"}
+  ]}},
+  "clinicaltrials": {"studies": [
+    {"protocolSection": {"identificationModule": {"nctId": "NCT000001", "briefTitle": "Cardiac regeneration trial"}, "statusModule": {"studyFirstPostDateStruct": {"date": "2026-09-11"}}, "descriptionModule": {"briefSummary": "Trial summary"}}},
+    {"protocolSection": {"identificationModule": {"nctId": "NCT000002", "briefTitle": "Old trial"}, "statusModule": {"studyFirstPostDateStruct": {"date": "2024-01-01"}}}}
+  ]},
+  "github": {"items": [
+    {"full_name": "Virelion-Biotech/example", "html_url": "https://github.com/Virelion-Biotech/example", "created_at": "2026-01-01T00:00:00Z", "updated_at": "2026-09-12T00:00:00Z", "pushed_at": "2026-09-12T00:00:00Z", "description": "Cardiac analysis"},
+    {"full_name": "example/old", "html_url": "https://github.com/example/old", "created_at": "2024-01-01T00:00:00Z", "updated_at": "2024-01-01T00:00:00Z", "pushed_at": "2024-01-01T00:00:00Z", "description": "Old"}
+  ]}
+}
