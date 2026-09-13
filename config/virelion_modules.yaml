@@ -1,23 +1,23 @@
 modules:
   CardiAtlas:
-    domains: [cardiac_omics, single_cell, disease_atlas]
+    domains: [cardiac_omics, ischemic_heart, cardiac_regeneration]
   CardiBench:
-    domains: [benchmarking, machine_learning, datasets]
+    domains: [computational_cardiology, cardiac_omics, cardiomyocyte_maturation]
   CardiEval:
-    domains: [evaluation, reproducibility]
+    domains: [computational_cardiology, cardiac_omics]
   ElectroTrace:
-    domains: [ECG, electrophysiology]
+    domains: [computational_cardiology]
   MyoTrace:
-    domains: [cardiomyocyte, maturation, metabolism]
+    domains: [cardiomyocyte_maturation, cardiac_regeneration]
   OptiCell:
-    domains: [iPSC, cell_quality]
+    domains: [cardiomyocyte_maturation, cardiac_regeneration]
   CardiLearn:
-    domains: [machine_learning]
+    domains: [computational_cardiology, cardiac_omics]
   CardiSim:
-    domains: [simulation, mechanistic_modeling]
+    domains: [computational_cardiology, cardiac_engineering, ischemic_heart]
   CardiTrace:
-    domains: [longitudinal_phenotyping]
+    domains: [ischemic_heart, cardiac_regeneration]
   CardiBridge:
-    domains: [integration, interoperability]
+    domains: [cardiac_omics, computational_cardiology, cardiac_engineering]
   HeartTwin:
-    domains: [multimodal, digital_twin, systems_cardiology]
+    domains: [computational_cardiology, cardiac_omics, ischemic_heart, cardiac_regeneration]
