@@ -1,10 +1,11 @@
 domains:
   cardiac_regeneration:
     - cardiac regeneration
+    - myocardial regeneration
     - cardiomyocyte regeneration
     - cardiomyocyte proliferation
     - cardiac reprogramming
-    - myocardial regeneration
+    - myocardial repair
   ischemic_heart:
     - myocardial infarction
     - ischemic injury
@@ -14,30 +15,31 @@ domains:
     - border zone
   cardiomyocyte_maturation:
     - cardiomyocyte maturation
-    - iPSC cardiomyocyte maturation
     - metabolic maturation
     - electrophysiological maturation
-    - sarcomere maturation
-  regenerative_engineering:
-    - engineered heart tissue
+    - iPSC cardiomyocyte
+    - iPSC-CM
+  cardiac_engineering:
     - cardiac tissue engineering
+    - engineered heart tissue
     - hydrogel
     - biomaterial
     - conductive patch
     - scaffold
-    - vascularization
+    - bioprinting
   cardiac_omics:
+    - single-cell RNA sequencing
+    - single nucleus RNA sequencing
     - scRNA-seq
     - snRNA-seq
-    - single cell RNA sequencing
-    - single nucleus RNA sequencing
     - spatial transcriptomics
     - cardiac transcriptomics
-    - cardiac proteomics
+    - proteomics
     - multiomics
   computational_cardiology:
     - cardiac artificial intelligence
+    - cardiac machine learning
     - ECG AI
     - cardiac imaging AI
     - cardiac digital twin
-    - mechanistic cardiac modeling
+    - computational cardiology
