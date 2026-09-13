@@ -4,17 +4,14 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
 
+PYTHON="${PYTHON_BIN:-python3}"
 WINDOW_DAYS="${WINDOW_DAYS:-7}"
-DB_PATH="${DB_PATH:-data/virelion_intelligence.sqlite3}"
+DB_PATH="${VIRELION_DB:-data/virelion_intelligence.sqlite3}"
 
-printf '[01] Python package check\n'
-python -c 'import virelion_intelligence; print(virelion_intelligence.PIPELINE_VERSION)'
+if [[ "${DRY_RUN:-0}" == "1" ]]; then
+  DB_PATH="${VIRELION_DRYRUN_DB:-data/dryrun.sqlite3}"
+fi
 
-printf '[02] Initialize reproducible run\n'
-python -m virelion_intelligence run --window-days "$WINDOW_DAYS" --db "$DB_PATH"
-
-printf '[03] Foundation smoke tests\n'
-pytest
-
-printf '[04] FOUNDATION RUN COMPLETE\n'
-printf 'Next stages: source discovery -> normalization -> ranking -> evidence -> datasets -> opportunities -> report.\n'
+"$PYTHON" -m virelion_intelligence run --window-days "$WINDOW_DAYS" --db "$DB_PATH"
+"$PYTHON" -m virelion_intelligence report --db "$DB_PATH" --output "reports/latest/intelligence.md"
+"$PYTHON" -m virelion_intelligence status --db "$DB_PATH"
