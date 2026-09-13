@@ -1,26 +1,17 @@
-# Dataset integrity rules
+# Dataset metadata rules
 
-Dataset discovery optimizes for safe acceptance, not maximum recall.
+## Acceptance
 
-## Required checks
+A dataset may be marked `ACCEPTED` only when its identity is resolved, the accession is authoritative, condition/control fields are interpretable, and replicate/sample structure is sufficiently specified for the intended analysis.
 
-Before automatic acceptance, establish:
+## Mandatory non-inference rules
 
-- study/accession identity
-- sample identity
-- donor/animal linkage when applicable
-- condition/control labels
-- biological vs technical replicate structure
-- tissue/anatomical region or injury zone where relevant
-- assay/platform
-- sample counts
+Never infer donor or animal identity from sample order. Never treat technical replicates as biological replicates. Never infer infarct, border, remote, or other anatomical zone labels from unrelated metadata. Never infer missing condition labels from a publication title alone.
 
-## Blocking states
+## Statuses
 
-`UNRESOLVED`, `AMBIGUOUS`, and `REVIEW_REQUIRED` block automatic ingestion.
+`RESOLVED` means the required identity structure is supported by source metadata. `REVIEW_REQUIRED` means the dataset may be useful but cannot be automatically accepted. `UNRESOLVED` and `AMBIGUOUS` are blocked for automatic ingestion.
 
-Never infer donor IDs, animal IDs, replicate relationships, infarct/border zone labels, or condition labels from weak context. Such cases remain explicit review items.
+## Recommended fields
 
-## Suitability vs identity
-
-Dataset suitability is query-dependent. Keep the underlying metadata record separate from the relevance score for a specific research question.
+Accession, study title, organism, tissue, cell type, condition, control, assay, platform, sample count, replicate count, donor/animal identifier, anatomical region, timepoint, batch and publication linkage.
