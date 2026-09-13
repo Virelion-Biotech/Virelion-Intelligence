@@ -1,0 +1,20 @@
+levels:
+  E0: unverified
+  E1: secondary source
+  E2: primary publication
+  E3: primary publication plus public code or data
+  E4: independent reproduction
+  E5: replicated across independent studies
+
+depths:
+  M0: metadata_only
+  M1: abstract
+  M2: full_text
+  M3: full_text_plus_figures_tables
+  M4: full_text_plus_linked_data_code
+
+publication:
+  require_source: true
+  require_supporting_text: true
+  reject_e0: true
+  reject_unresolved_dataset: true
