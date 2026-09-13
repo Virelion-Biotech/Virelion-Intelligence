@@ -1,0 +1,31 @@
+sources:
+  pubmed:
+    adapter: pubmed
+    category: literature
+    authority: primary
+    enabled: true
+    priority: 1
+  europe_pmc:
+    adapter: europe_pmc
+    category: literature
+    authority: primary
+    enabled: true
+    priority: 1
+  geo:
+    adapter: geo
+    category: dataset
+    authority: primary
+    enabled: true
+    priority: 1
+  clinicaltrials:
+    adapter: clinicaltrials
+    category: clinical
+    authority: primary
+    enabled: true
+    priority: 1
+  github:
+    adapter: github
+    category: software
+    authority: secondary
+    enabled: true
+    priority: 2
