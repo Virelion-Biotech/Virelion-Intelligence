@@ -1,0 +1,18 @@
+relevance:
+  cardiovascular: 0.25
+  scientific: 0.20
+  virelion: 0.15
+  novelty: 0.10
+  dataset: 0.10
+  translation: 0.10
+  reproducibility: 0.10
+
+opportunity:
+  scientific_importance: 0.20
+  evidence_strength: 0.20
+  reproducibility: 0.15
+  data_availability: 0.15
+  computational_feasibility: 0.10
+  virelion_relevance: 0.10
+  differentiation: 0.05
+  translational_potential: 0.05
