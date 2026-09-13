@@ -1,82 +1,65 @@
 ---
 name: virelion-intelligence
-description: Evidence-first research workflow for discovering, verifying, ranking, and synthesizing cardiovascular literature, datasets, software, and translational signals for Virelion.
+description: Discover, verify, rank, and synthesize cardiovascular literature, datasets, translational signals, and software into provenance-backed Virelion research intelligence.
 ---
 
-# Virelion Intelligence research protocol
+# Virelion Intelligence Agent Protocol
 
 ## Non-negotiable rules
 
-1. Search results are leads, not evidence.
-2. Do not state an external fact until its source has been fetched.
-3. Never invent DOI, PMID, accession, NCT, version, date, number, or URL.
-4. Distinguish source fact, author interpretation, Virelion inference, and hypothesis.
-5. Every substantive claim must have a traceable source and evidence record.
-6. Do not silently infer donor, animal, replicate, condition, or anatomical-zone identity in ambiguous datasets.
-7. Preserve raw source material and normalized records separately.
-8. Prefer primary sources and authoritative registries over secondary summaries.
+1. Never write a scientific fact from model memory. Use retrieved source evidence.
+2. Search results are leads, not evidence. Open the underlying source before citing a claim.
+3. Never invent DOI, PMID, accession, NCT ID, figure number, sample count, date, or benchmark value.
+4. Distinguish source fact, author interpretation, Virelion inference, and Virelion hypothesis.
+5. Ambiguous dataset identity, donor/animal mapping, replicate mapping, condition labels, or anatomical-zone labels must remain unresolved rather than guessed.
+6. Evidence strength and extraction confidence are separate fields.
+7. Every published claim must resolve to an evidence record and source record.
+8. Prefer primary literature, official datasets, trial registries, repository metadata, and original software releases.
+9. Do not silently convert preprints or secondary reporting into established findings.
+10. A failure to verify is preferable to a fabricated answer.
 
 ## Pipeline
 
-### Phase 0 — Define the window
+### Phase 0 — Window
 
-Record UTC start/end timestamps. Record pipeline version, configuration revision, and model identifiers.
+Record the exact start and end timestamps. For a weekly run, cover the preceding seven days. Read the previous run's selected sources to avoid recycled reporting unless a genuine update exists.
 
-### Phase 1 — Discover
+### Phase 1 — Discovery
 
-Sweep configured literature, dataset, software, and translational sources. Bias toward recall during discovery.
+Sweep cardiovascular regeneration, ischemic heart disease, cardiomyocyte maturation, regenerative engineering, cardiac omics, computational cardiology, datasets, clinical translation, and relevant software/models.
 
 ### Phase 2 — Normalize
 
-Canonicalize identifiers, dates, titles, authors, source types, and source authority. Preserve raw payloads.
+Canonicalize title, identifiers, dates, URLs, authors and source type. Preserve raw payloads.
 
 ### Phase 3 — Deduplicate
 
-Use exact DOI/PMID/accession matching, normalized-title matching, then optional semantic similarity. Do not merge follow-up, replication, extension, or contradiction records as duplicates.
+Use exact DOI/PMID/accession matching first, normalized-title similarity second, semantic matching only as a candidate relationship. Never merge merely related studies.
 
 ### Phase 4 — Rank
 
-Score cardiovascular relevance, scientific relevance, Virelion relevance, novelty, dataset value, translation, and reproducibility. Store component scores, not only a final score.
+Use transparent deterministic relevance scores before expensive deep reading. Store every component score.
 
-### Phase 5 — Deep review
+### Phase 5 — Evidence extraction
 
-Read the strongest available source: structured full text when available, then accessible HTML/PDF, then abstract. Record evidence depth explicitly.
+For high-value records extract finding, experimental model, intervention, comparator, endpoint, effect, limitations, evidence depth, and supporting text/location.
 
-### Phase 6 — Extract evidence
+### Phase 6 — Dataset analysis
 
-Capture the claim, supporting passage, section/figure when available, model, intervention, comparator, outcome, sample/design details, limitations, evidence level, and extraction confidence.
+Identify species, tissue, cell type, condition, control, assay, sample count, replicate structure, dataset accession and metadata quality. Any unresolved identity issue produces REVIEW_REQUIRED rather than acceptance.
 
-### Phase 7 — Dataset integrity
+### Phase 7 — Opportunity generation
 
-Validate sample-level identity, condition, replicate structure, tissue/zone, and study design. Ambiguous fields become REVIEW_REQUIRED or UNRESOLVED rather than guessed.
+Generate only evidence-linked opportunities. Each opportunity must state its underlying finding, limitation, available evidence/data, proposed Virelion action, expected deliverable, and score.
 
-### Phase 8 — Opportunity analysis
+### Phase 8 — Virelion mapping
 
-Identify reproducibility opportunities, dataset gaps, benchmark opportunities, model/evaluation opportunities, mechanistic gaps, and translational signals. Every proposed opportunity must point back to evidence.
+Map findings to CardiAtlas, CardiBench, CardiEval, ElectroTrace, MyoTrace, OptiCell, CardiLearn, CardiSim, CardiTrace, CardiBridge, and HeartTwin using configuration-backed domain overlap. Do not invent mappings outside the configured module ontology.
 
-### Phase 9 — Virelion mapping
+### Phase 9 — Reporting
 
-Map findings to CardiAtlas, CardiBench, CardiEval, ElectroTrace, MyoTrace, OptiCell, CardiLearn, CardiSim, CardiTrace, CardiBridge, and HeartTwin. Give each mapping a rationale and score.
+Generate human-readable reports only from persisted structured records. Preserve source IDs and evidence IDs in the report context.
 
-### Phase 10 — Report
+### Phase 10 — Validation
 
-Generate human-readable reports from persisted records. Never make the report the source of truth.
-
-### Phase 11 — Validate
-
-Run schema validation, provenance checks, identifier checks, dataset-integrity checks, placeholder checks, and security checks before publication.
-
-## Output hierarchy
-
-```text
-raw source
-  -> normalized source
-  -> claim
-  -> evidence
-  -> finding
-  -> opportunity
-  -> Virelion mapping
-  -> report
-```
-
-The report must be reproducible from the records above it.
+Before publication verify schema, provenance, identifiers, dataset status, placeholders, artifact existence, and secret exposure.
