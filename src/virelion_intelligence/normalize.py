@@ -1,24 +1,48 @@
 from __future__ import annotations
 
+import hashlib
 import re
 import unicodedata
-from hashlib import sha256
+from datetime import datetime, timezone
 
 
-def normalize_title(value: str) -> str:
-    value = unicodedata.normalize("NFKC", value).casefold()
+def normalize_text(value: str) -> str:
+    value = unicodedata.normalize("NFKC", value or "")
+    value = value.casefold()
     value = re.sub(r"[^\w\s]", " ", value, flags=re.UNICODE)
-    return " ".join(value.split())
+    return re.sub(r"\s+", " ", value).strip()
 
 
-def content_hash(*parts: str) -> str:
-    material = "\x1f".join(p.strip() for p in parts)
-    return sha256(material.encode("utf-8")).hexdigest()
+def canonical_title(value: str) -> str:
+    return normalize_text(value)
 
 
-def canonical_publication_key(title: str, doi: str | None = None, pmid: str | None = None) -> str:
-    if doi:
-        return f"doi:{doi.strip().lower()}"
-    if pmid:
-        return f"pmid:{pmid.strip()}"
-    return f"title:{normalize_title(title)}"
+def normalize_doi(value: str | None) -> str | None:
+    if not value:
+        return None
+    value = value.strip()
+    value = re.sub(r"^https?://(dx\.)?doi\.org/", "", value, flags=re.I)
+    value = value.removeprefix("doi:").strip()
+    return value.lower() or None
+
+
+def normalize_pmid(value: str | int | None) -> str | None:
+    if value is None:
+        return None
+    digits = re.sub(r"\D", "", str(value))
+    return digits or None
+
+
+def normalize_accession(value: str | None) -> str | None:
+    if not value:
+        return None
+    return value.strip().upper() or None
+
+
+def content_hash(*parts: str | None) -> str:
+    payload = "\n".join(p or "" for p in parts)
+    return hashlib.sha256(payload.encode("utf-8")).hexdigest()
+
+
+def utc_now() -> datetime:
+    return datetime.now(timezone.utc)
