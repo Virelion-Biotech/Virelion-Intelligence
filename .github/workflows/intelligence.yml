@@ -12,6 +12,7 @@ on:
 
 permissions:
   contents: read
+  actions: write
 
 jobs:
   intelligence:
@@ -22,6 +23,21 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+      - name: Restore discovery state
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          artifact_id="$(gh api "/repos/${GITHUB_REPOSITORY}/actions/artifacts?per_page=100" \
+            --jq '.artifacts | map(select(.name == "virelion-intelligence-state" and .expired == false)) | sort_by(.created_at) | if length == 0 then "" else .[-1].id end')"
+          if [[ -n "$artifact_id" ]]; then
+            mkdir -p data
+            gh api "/repos/${GITHUB_REPOSITORY}/actions/artifacts/${artifact_id}/zip" > /tmp/virelion-intelligence-state.zip
+            unzip -o /tmp/virelion-intelligence-state.zip -d . >/dev/null
+            echo "Restored discovery state artifact ${artifact_id}."
+          else
+            echo "No prior discovery state artifact found; starting with empty state."
+          fi
       - name: Install
         run: python -m pip install -e ".[dev]"
       - name: Run discovery pipeline
@@ -40,3 +56,10 @@ jobs:
           path: |
             reports/latest/intelligence.md
             data/runs/*.json
+            data/discovery_state.json
+      - name: Refresh durable discovery state
+        uses: actions/upload-artifact@v4
+        with:
+          name: virelion-intelligence-state
+          retention-days: 90
+          path: data/discovery_state.json
