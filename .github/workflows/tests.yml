@@ -14,5 +14,8 @@ jobs:
           python-version: '3.11'
       - run: python -m pip install --upgrade pip
       - run: pip install -e '.[dev]'
+      - run: ruff check src tests scripts
+      - run: python -m compileall -q src scripts
+      - run: bash -n scripts/run_intelligence.sh
       - run: pytest
       - run: python -m virelion_intelligence --help
