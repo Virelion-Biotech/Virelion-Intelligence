@@ -8,7 +8,6 @@ import httpx
 from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_exponential
 from .models import DatasetRecord, SourceRecord
 from .normalize import canonical_title, content_hash, normalize_accession, normalize_doi, normalize_pmid
-from .state import DiscoveryState
 
 @dataclass(frozen=True)
 class Query:

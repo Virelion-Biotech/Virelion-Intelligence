@@ -1,9 +1,7 @@
 from __future__ import annotations
 
-import json
 import sqlite3
 from pathlib import Path
-from typing import Iterable
 
 from .models import Claim, DatasetRecord, Evidence, Opportunity, PaperRecord, RunManifest, SourceRecord
 
