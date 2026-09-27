@@ -12,7 +12,6 @@ def test_doi_and_pmid_normalization():
 
 def test_dedupe_prefers_exact_doi():
     first = SourceRecord(source_id="S1", source_type="literature", title="Cardiac regeneration", url="https://example.org", doi="10.1000/test")
-    second = SourceRecord(source_id="S2", source_type="literature", title="Other", url="https://example.org", doi="10.1000/other")
     from virelion_intelligence.pipeline import source_to_paper
     a = source_to_paper(first)
     b = source_to_paper(first)
