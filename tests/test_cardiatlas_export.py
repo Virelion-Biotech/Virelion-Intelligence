@@ -81,6 +81,7 @@ def test_clinical_source_is_database_evidence():
 
 def test_dataset_export_preserves_review_state_and_links_evidence():
     evidence, dataset = dataset_to_atlas_records(_dataset())
+    assert dataset is not None
     assert evidence["source_type"] == "geo"
     assert evidence["evidence_level"] == "database"
     assert evidence["extracted_claim"] == ""
@@ -95,9 +96,29 @@ def test_dataset_export_preserves_review_state_and_links_evidence():
 
 def test_unknown_assay_is_not_guessed():
     _, dataset = dataset_to_atlas_records(_dataset(assay="spatial multi-omic custom assay"))
+    assert dataset is not None
     assert dataset["modalities"] == ["other"]
     assert dataset["cell_or_nucleus"] == "unknown"
     assert dataset["metadata"]["virelion_intelligence_dataset"]["assay"] == "spatial multi-omic custom assay"
+
+
+def test_missing_accession_exports_evidence_only_without_inventing_identity():
+    evidence, dataset = dataset_to_atlas_records(
+        _dataset(accession="", identity_status="AMBIGUOUS")
+    )
+    assert dataset is None
+    assert evidence["source_identifier"] == "geo:GSE123"
+    assert evidence["context"]["identity_status"] == "AMBIGUOUS"
+    assert evidence["extracted_claim"] == ""
+
+
+def test_empty_titles_use_existing_identifiers_not_invented_text():
+    source = source_to_atlas_evidence(_source(title=""))
+    assert source["name"] == "123"
+    evidence, dataset = dataset_to_atlas_records(_dataset(title=""))
+    assert evidence["name"] == "GSE123"
+    assert dataset is not None
+    assert dataset["name"] == "GSE123"
 
 
 def test_export_is_deterministic_and_deduplicated():
