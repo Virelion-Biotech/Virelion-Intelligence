@@ -22,10 +22,15 @@ def test_dedupe_prefers_exact_doi():
 
 
 def test_provenance_requires_matching_source_and_evidence():
-    source = SourceRecord(source_id="S1", source_type="literature", title="Finding", url="https://example.org")
+    source = SourceRecord(source_id="S1", source_type="literature", title="Finding", abstract="A finding was observed.", url="https://example.org")
     claim = Claim(claim_id="C1", source_id="S1", text="A finding", claim_type="SOURCE_FACT", evidence_level=EvidenceLevel.E2, extraction_confidence=0.9)
     evidence = Evidence(evidence_id="E1", claim_id="C1", source_id="S1", supporting_text="A finding was observed.", evidence_level=EvidenceLevel.E2, evidence_depth="M1", confidence=0.95)
     assert validate_claim_evidence(claim, evidence, source) == []
+    evidence.supporting_text = "An invented result."
+    assert any("not present" in error for error in validate_claim_evidence(claim, evidence, source))
+    evidence.supporting_text = source.abstract
+    evidence.evidence_depth = "M4"
+    assert any("full-text" in error for error in validate_claim_evidence(claim, evidence, source))
 
 
 def test_unresolved_dataset_is_not_accepted():

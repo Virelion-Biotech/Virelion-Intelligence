@@ -6,7 +6,7 @@ import uuid
 from .llm import LLMClient
 from .models import Claim, Evidence, EvidenceDepth, EvidenceLevel, SourceRecord
 
-SYSTEM_PROMPT = """You are a biomedical evidence extraction engine. Never invent facts. Extract only what is explicitly supported by the provided source text. Return JSON with claim and evidence objects. Distinguish reported findings from interpretation and limitations."""
+SYSTEM_PROMPT = """You are a biomedical evidence extraction engine. Never invent facts. Extract only what is explicitly supported by the provided source text. Return JSON with claim and evidence objects. Distinguish reported findings from interpretation and limitations. supporting_text must be an exact excerpt from the supplied title or abstract. Set evidence_depth to M1 only when an abstract is supplied, otherwise M0; full text has not been supplied."""
 
 
 def heuristic_claim(source: SourceRecord) -> tuple[Claim, Evidence]:

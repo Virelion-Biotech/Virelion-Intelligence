@@ -30,6 +30,14 @@ def validate_claim_evidence(claim: Claim, evidence: Evidence, source: SourceReco
         errors.append("claim has no text")
     if not evidence.supporting_text.strip():
         errors.append("evidence has no supporting text")
+    excerpt = " ".join(evidence.supporting_text.split())
+    available = [" ".join(text.split()) for text in (source.title, source.abstract or "")]
+    if excerpt and not any(excerpt in text for text in available):
+        errors.append("supporting excerpt is not present in the supplied source text")
+    if evidence.evidence_depth in {"M2", "M3", "M4"}:
+        errors.append("full-text evidence depth requires full-text content; this source contains metadata/abstract only")
+    if evidence.evidence_depth == "M1" and not (source.abstract or "").strip():
+        errors.append("abstract evidence depth requires an abstract")
     if claim.evidence_level == "E0":
         errors.append("unverified claim cannot pass publication validation")
     return errors

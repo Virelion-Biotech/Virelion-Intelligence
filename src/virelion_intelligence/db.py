@@ -97,7 +97,8 @@ class IntelligenceDB:
             """INSERT INTO papers(paper_id,payload,canonical_title,doi,pmid,pmcid,content_hash,first_seen,last_seen)
                VALUES(?,?,?,?,?,?,?,?,?)
                ON CONFLICT(paper_id) DO UPDATE SET payload=excluded.payload, last_seen=excluded.last_seen,
-                 relevance_score=json_extract(excluded.payload,'$.relevance_score')""",
+                 canonical_title=excluded.canonical_title, doi=excluded.doi, pmid=excluded.pmid,
+                 pmcid=excluded.pmcid, content_hash=excluded.content_hash""",
             (item.paper_id, payload, item.title.strip().lower(), item.doi, item.pmid, item.pmcid,
              item.content_hash, item.first_seen_at.isoformat(), now),
         )
@@ -133,7 +134,7 @@ class IntelligenceDB:
         return [PaperRecord.model_validate_json(r[0]) for r in rows]
 
     def list_datasets(self, limit: int = 50) -> list[DatasetRecord]:
-        rows = self.conn.execute("SELECT payload FROM datasets ORDER BY suitability_score DESC LIMIT ?", (limit,)).fetchall()
+        rows = self.conn.execute("SELECT payload FROM datasets ORDER BY CAST(json_extract(payload, '$.suitability_score') AS REAL) DESC, dataset_id LIMIT ?", (limit,)).fetchall()
         return [DatasetRecord.model_validate_json(r[0]) for r in rows]
 
     def list_opportunities(self, limit: int = 50) -> list[Opportunity]:

@@ -13,7 +13,7 @@ from .normalize import canonical_title, content_hash, normalize_accession, norma
 class Query:
     text:str; start:datetime; end:datetime; limit:int=50
     @property
-    def state_key(self)->str:return f"{self.text}|{self.start.date()}|{self.end.date()}"
+    def state_key(self)->str:return f"{self.text}|{self.start.isoformat()}|{self.end.isoformat()}|{self.limit}"
 class RateLimitError(RuntimeError):pass
 class HTTPClient:
     def __init__(self,timeout:float=30.0,user_agent:str="Virelion-Intelligence/0.3")->None:self.client=httpx.Client(timeout=timeout,follow_redirects=True,headers={"User-Agent":f"{user_agent} (+https://github.com/Virelion-Biotech/Virelion-Intelligence)"})

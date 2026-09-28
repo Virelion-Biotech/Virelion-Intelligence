@@ -93,7 +93,7 @@ def run(window_days: int = 7, db_path: str = "data/virelion_intelligence.sqlite3
     )
     db = IntelligenceDB(db_path)
     llm = LLMClient.from_env()
-    state = DiscoveryState()
+    state = DiscoveryState(Path(db_path).with_suffix(".discovery.json"), autocommit=False)
     adapters = [
         PubMedAdapter(state=state),
         EuropePMCAdapter(state=state),
@@ -121,6 +121,7 @@ def run(window_days: int = 7, db_path: str = "data/virelion_intelligence.sqlite3
         for text in queries:
             q = Query(text=text, start=start, end=end, limit=50)
             for adapter in adapters:
+                checkpoint = state.snapshot()
                 try:
                     records = adapter.search(q)
                     counts["adapter_successes"] += 1
@@ -145,11 +146,12 @@ def run(window_days: int = 7, db_path: str = "data/virelion_intelligence.sqlite3
                         seen.append(paper)
                         counts["papers"] += 1
                 except Exception:
+                    state.restore(checkpoint)
                     counts["errors"] += 1
                     counts["adapter_failures"] += 1
         if counts["adapter_successes"] == 0:
             manifest.status = "FAILED"
-        elif counts["adapter_successes"] < len(queries) * len(adapters) and counts["raw_records"] == 0:
+        elif counts["adapter_failures"]:
             manifest.status = "PARTIAL"
         else:
             manifest.status = "COMPLETE"
@@ -182,6 +184,7 @@ def run(window_days: int = 7, db_path: str = "data/virelion_intelligence.sqlite3
                     pmid=paper.pmid,
                     authority="primary",
                 )
+            db.upsert_source(source)
             try:
                 claim, evidence = extract_from_source(source, llm)
                 errors = validate_claim_evidence(claim, evidence, source)
@@ -217,10 +220,13 @@ def run(window_days: int = 7, db_path: str = "data/virelion_intelligence.sqlite3
                     counts["opportunities"] += 1
             except Exception:
                 counts["errors"] += 1
+        if counts["errors"] and manifest.status == "COMPLETE":
+            manifest.status = "PARTIAL"
         manifest.finished_at = utc_now()
         manifest.counts = counts
         db.upsert_run(manifest)
         db.commit()
+        state.commit()
         Path("data/runs").mkdir(parents=True, exist_ok=True)
         Path(f"data/runs/{run_id}.json").write_text(
             manifest.model_dump_json(indent=2),
