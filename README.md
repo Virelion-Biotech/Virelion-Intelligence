@@ -29,6 +29,7 @@ Deterministic Python code owns identifiers, dates, persistence, validation and s
 - dataset identity and metadata-integrity gates
 - configurable Virelion module mapping
 - SQLite persistent corpus and run manifests
+- conservative CardiAtlas JSONL export for source and dataset metadata
 - Markdown report generation
 - optional OpenAI-compatible LLM provider
 - local dry-run path without an LLM
@@ -62,7 +63,18 @@ virelion-intel version
 virelion-intel status
 virelion-intel run --window-days 7
 virelion-intel report --output reports/latest/intelligence.md
+virelion-intel export-cardiatlas --output data/cardiatlas/intelligence.jsonl
 ```
+
+The CardiAtlas export is deliberately conservative: literature and clinical
+source records become provenance-preserving `EvidenceRecord` metadata with no
+fabricated extracted claim, while discovered datasets become a CardiAtlas
+dataset plus a linked database-evidence record. Unresolved identity/suitability
+states and the complete Virelion Intelligence source payload are retained in
+metadata/quality flags. A dataset with no accession is exported as evidence-only
+instead of receiving an invented accession or producing an invalid Atlas dataset.
+The output is JSONL and can be loaded with
+`cardiatlas load <db> data/cardiatlas/intelligence.jsonl`.
 
 Or use the operator script:
 

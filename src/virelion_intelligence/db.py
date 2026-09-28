@@ -129,6 +129,20 @@ class IntelligenceDB:
             raise ValueError("unsupported table")
         return int(self.conn.execute(f"SELECT COUNT(*) FROM {table}").fetchone()[0])
 
+    def list_sources(self, limit: int | None = None) -> list[SourceRecord]:
+        sql = "SELECT payload FROM sources ORDER BY source_id"
+        if limit is None:
+            rows = self.conn.execute(sql).fetchall()
+        else:
+            if limit < 0:
+                raise ValueError("limit must be >= 0")
+            rows = self.conn.execute(f"{sql} LIMIT ?", (limit,)).fetchall()
+        return [SourceRecord.model_validate_json(row[0]) for row in rows]
+
+    def all_datasets(self) -> list[DatasetRecord]:
+        rows = self.conn.execute("SELECT payload FROM datasets ORDER BY dataset_id").fetchall()
+        return [DatasetRecord.model_validate_json(row[0]) for row in rows]
+
     def list_papers(self, limit: int = 50) -> list[PaperRecord]:
         rows = self.conn.execute("SELECT payload FROM papers ORDER BY last_seen DESC LIMIT ?", (limit,)).fetchall()
         return [PaperRecord.model_validate_json(r[0]) for r in rows]
