@@ -71,7 +71,9 @@ source records become provenance-preserving `EvidenceRecord` metadata with no
 fabricated extracted claim, while discovered datasets become a CardiAtlas
 dataset plus a linked database-evidence record. Unresolved identity/suitability
 states and the complete Virelion Intelligence source payload are retained in
-metadata/quality flags. The output is JSONL and can be loaded with
+metadata/quality flags. A dataset with no accession is exported as evidence-only
+instead of receiving an invented accession or producing an invalid Atlas dataset.
+The output is JSONL and can be loaded with
 `cardiatlas load <db> data/cardiatlas/intelligence.jsonl`.
 
 Or use the operator script:
