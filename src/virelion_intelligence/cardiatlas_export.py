@@ -44,11 +44,14 @@ def _source_evidence_level(source: SourceRecord) -> str:
 
 def source_to_atlas_evidence(source: SourceRecord) -> dict[str, Any]:
     """Map one discovered source to a provenance-preserving Atlas EvidenceRecord."""
+    if not source.source_id.strip():
+        raise ValueError("source_id must be non-empty for CardiAtlas export")
     identifier = source.pmid or source.doi or source.accession or source.source_id
+    name = source.title.strip() or identifier
     return {
         "id": f"evidence:{source.source_id}",
         "record_type": "evidence",
-        "name": source.title,
+        "name": name,
         "description": source.abstract or "",
         "source_ids": [source.source_id],
         "tags": _unique([*source.tags, "virelion-intelligence"]),
@@ -59,7 +62,7 @@ def source_to_atlas_evidence(source: SourceRecord) -> dict[str, Any]:
         "schema_version": _SCHEMA_VERSION,
         "source_type": _source_type(source),
         "source_identifier": identifier,
-        "citation": source.title,
+        "citation": source.title.strip() or identifier,
         "evidence_level": _source_evidence_level(source),
         "polarity": "unknown",
         "organism": None,
@@ -116,10 +119,18 @@ def _modality(assay: str | None) -> tuple[list[str], str]:
     return [mapped[0]], mapped[1]
 
 
-def dataset_to_atlas_records(dataset: DatasetRecord) -> tuple[dict[str, Any], dict[str, Any]]:
-    """Return (database evidence, dataset) without upgrading unresolved metadata."""
+def dataset_to_atlas_records(dataset: DatasetRecord) -> tuple[dict[str, Any], dict[str, Any] | None]:
+    """Return database evidence and, when valid, a linked Atlas dataset record.
+
+    Intelligence keeps missing-accession datasets as review candidates. CardiAtlas
+    requires a non-empty accession, so those candidates export as evidence only
+    rather than receiving an invented accession or producing invalid JSONL.
+    """
+    if not dataset.dataset_id.strip():
+        raise ValueError("dataset_id must be non-empty for CardiAtlas export")
     evidence_id = f"evidence:{dataset.dataset_id}"
     repository = _repository(dataset.source)
+    name = dataset.title.strip() or dataset.accession.strip() or dataset.dataset_id
     evidence_source_type = {
         "GEO": "geo",
         "SRA": "sra",
@@ -129,7 +140,7 @@ def dataset_to_atlas_records(dataset: DatasetRecord) -> tuple[dict[str, Any], di
     evidence = {
         "id": evidence_id,
         "record_type": "evidence",
-        "name": dataset.title,
+        "name": name,
         "description": "",
         "source_ids": [dataset.dataset_id],
         "tags": ["virelion-intelligence", "dataset-metadata"],
@@ -139,8 +150,8 @@ def dataset_to_atlas_records(dataset: DatasetRecord) -> tuple[dict[str, Any], di
         },
         "schema_version": _SCHEMA_VERSION,
         "source_type": evidence_source_type,
-        "source_identifier": dataset.accession,
-        "citation": dataset.title,
+        "source_identifier": dataset.accession.strip() or dataset.dataset_id,
+        "citation": dataset.title.strip() or dataset.accession.strip() or dataset.dataset_id,
         "evidence_level": "database",
         "polarity": "unknown",
         "organism": dataset.species,
@@ -156,6 +167,9 @@ def dataset_to_atlas_records(dataset: DatasetRecord) -> tuple[dict[str, Any], di
         },
     }
 
+    if not dataset.accession.strip():
+        return evidence, None
+
     modalities, cell_or_nucleus = _modality(dataset.assay)
     quality_flags = _unique([
         f"intelligence.identity_status:{dataset.identity_status}",
@@ -165,7 +179,7 @@ def dataset_to_atlas_records(dataset: DatasetRecord) -> tuple[dict[str, Any], di
     atlas_dataset = {
         "id": f"dataset:{dataset.dataset_id}",
         "record_type": "dataset",
-        "name": dataset.title,
+        "name": name,
         "description": "",
         "source_ids": [dataset.dataset_id],
         "tags": ["virelion-intelligence"],
@@ -211,7 +225,8 @@ def export_records(
     for dataset in datasets:
         evidence, record = dataset_to_atlas_records(dataset)
         by_id[evidence["id"]] = evidence
-        by_id[record["id"]] = record
+        if record is not None:
+            by_id[record["id"]] = record
     return [by_id[key] for key in sorted(by_id)]
 
 
