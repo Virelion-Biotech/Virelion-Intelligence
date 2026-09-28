@@ -4,6 +4,7 @@ import argparse
 from pathlib import Path
 
 from . import PIPELINE_VERSION
+from .cardiatlas_export import write_cardiatlas_jsonl
 from .db import IntelligenceDB
 from .pipeline import run
 from .reports import build_markdown_report
@@ -24,6 +25,10 @@ def build_parser() -> argparse.ArgumentParser:
     p = sub.add_parser("report", help="render the current corpus as Markdown")
     p.add_argument("--db", type=Path, default=Path("data/virelion_intelligence.sqlite3"))
     p.add_argument("--output", type=Path, default=Path("reports/latest/intelligence.md"))
+
+    a = sub.add_parser("export-cardiatlas", help="export source/dataset metadata as CardiAtlas JSONL")
+    a.add_argument("--db", type=Path, default=Path("data/virelion_intelligence.sqlite3"))
+    a.add_argument("--output", type=Path, default=Path("data/cardiatlas/intelligence.jsonl"))
 
     sub.add_parser("version", help="print pipeline version")
     return parser
@@ -51,6 +56,15 @@ def main() -> int:
         args.output.parent.mkdir(parents=True, exist_ok=True)
         args.output.write_text(output, encoding="utf-8")
         print(args.output)
+        return 0
+    if args.command == "export-cardiatlas":
+        with IntelligenceDB(args.db) as db:
+            count = write_cardiatlas_jsonl(
+                args.output,
+                sources=db.list_sources(),
+                datasets=db.all_datasets(),
+            )
+        print(f"{args.output}: {count} CardiAtlas records")
         return 0
     return 2
 
