@@ -1,0 +1,18 @@
+sources:
+  - GEO
+  - SRA
+  - EGA
+  - CELLxGENE
+  - Zenodo
+
+acceptance:
+  require_resolved_identity: true
+  require_replicate_structure: true
+  require_condition_control: true
+  minimum_metadata_quality: 0.75
+
+priority_domains:
+  - ischemic_heart
+  - cardiac_regeneration
+  - cardiomyocyte_maturation
+  - cardiac_omics

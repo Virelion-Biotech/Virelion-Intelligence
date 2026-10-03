@@ -1,0 +1,23 @@
+modules:
+  CardiAtlas:
+    domains: [cardiac_omics, ischemic_heart, cardiac_regeneration]
+  CardiBench:
+    domains: [computational_cardiology, cardiac_omics, cardiomyocyte_maturation]
+  CardiEval:
+    domains: [computational_cardiology, cardiac_omics]
+  ElectroTrace:
+    domains: [computational_cardiology]
+  MyoTrace:
+    domains: [cardiomyocyte_maturation, cardiac_regeneration]
+  OptiCell:
+    domains: [cardiomyocyte_maturation, cardiac_regeneration]
+  CardiLearn:
+    domains: [computational_cardiology, cardiac_omics]
+  CardiSim:
+    domains: [computational_cardiology, cardiac_engineering, ischemic_heart]
+  CardiTrace:
+    domains: [ischemic_heart, cardiac_regeneration]
+  CardiBridge:
+    domains: [cardiac_omics, computational_cardiology, cardiac_engineering]
+  HeartTwin:
+    domains: [computational_cardiology, cardiac_omics, ischemic_heart, cardiac_regeneration]
