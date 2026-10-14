@@ -4,6 +4,21 @@ Evidence-first cardiovascular research intelligence pipeline.
 
 Virelion Intelligence discovers literature, datasets, clinical/translational signals and research software; normalizes and deduplicates records; ranks relevance; extracts evidence with provenance; evaluates dataset metadata integrity; scores research opportunities; maps findings to Virelion systems; and generates auditable reports and structured run artifacts.
 
+
+<!-- VALIDATION_PRODUCT_STATUS:BEGIN -->
+## Validation and product completion status
+
+**Reviewed 2026-10-14; implementation base `9148341d94c6`.** **Status: Discovery/extraction research pipeline; curated accuracy/coverage qualification incomplete.** This is an evidence-backed scope assessment, not a percentage-complete estimate or a declaration that the product is finished.
+
+| Area | Current evidence / remaining gate |
+|---|---|
+| Software / operational checks | Automated test sources and CI definitions are present; this documentation audit does not report a new algorithm/data-validation run. |
+| Scientific or domain evidence | API/source adapters, deterministic fallback and regression tests exist. Retrieved records and opportunity scores are candidates; extraction confidence is not source-backed claim truth or scientific novelty proof. |
+| Remaining for the declared product scope | Benchmark entity resolution, source recall, extraction accuracy and ranking against reviewed examples; qualify live API pagination/retry/window coverage and outage handling; audit source/licensing/provenance refresh and Atlas admission; calibrate opportunity scoring with explicit human-review criteria. |
+
+Evidence and limits: [repository report](README.md). The [organization status index](https://github.com/Virelion-Biotech/Virelion-HeartTwin/blob/main/docs/STACK_VALIDATION_STATUS.md) separates software, numerical, data-readiness and empirical qualification. Code/schema execution or a completed download is not a substitute for endpoint-specific validation.
+<!-- VALIDATION_PRODUCT_STATUS:END -->
+
 ## Architecture
 
 ```text
