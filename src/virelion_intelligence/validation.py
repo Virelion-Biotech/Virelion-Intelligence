@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import re
 from pathlib import Path
 
@@ -62,7 +63,13 @@ def validate_report_text(text: str) -> list[str]:
 
 def check_secret_paths(root: Path) -> list[str]:
     offenders: list[str] = []
-    for path in root.rglob("*"):
-        if path.is_file() and (path.name == ".env" or "logs" in path.parts):
-            offenders.append(str(path.relative_to(root)))
-    return offenders
+    for directory, subdirectories, files in os.walk(root, followlinks=False):
+        # Git's own reflogs are repository metadata, not exported runtime logs.
+        # Prune this exact directory only; application logs/.env stay forbidden.
+        subdirectories[:] = [name for name in subdirectories if name != ".git"]
+        for name in files:
+            path = Path(directory) / name
+            relative = path.relative_to(root)
+            if name == ".env" or "logs" in relative.parts:
+                offenders.append(str(relative))
+    return sorted(offenders)
