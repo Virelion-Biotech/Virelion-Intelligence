@@ -1,0 +1,33 @@
+{
+  "counts": {
+    "adapter_failures": 0,
+    "adapter_successes": 35,
+    "claims": 14,
+    "datasets": 274,
+    "duplicates": 56,
+    "errors": 0,
+    "evidence": 14,
+    "opportunities": 13,
+    "papers": 82,
+    "raw_records": 421
+  },
+  "database_inventory": {
+    "claims": 14,
+    "datasets": 229,
+    "evidence": 14,
+    "opportunities": 13,
+    "papers": 82,
+    "runs": 1,
+    "sources": 96
+  },
+  "finished_at": "2026-10-18T21:12:03.910068Z",
+  "integrity_cli": "PASS",
+  "interpretation": "Local live discovery execution and integrity check; candidate records and scores remain uncurated.",
+  "metrics": {},
+  "pipeline_version": "0.3.0",
+  "run_id": "R-20261018-92519a4c",
+  "started_at": "2026-10-18T21:08:57.577418Z",
+  "status": "COMPLETE",
+  "window_end": "2026-10-18T21:08:57.577345Z",
+  "window_start": "2026-10-11T21:08:57.577345Z"
+}
