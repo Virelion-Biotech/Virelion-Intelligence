@@ -136,4 +136,4 @@ python scripts/check_integrity.py
 
 ## License
 
-GPL-3.0-or-later. See `LICENSE`.
+Copyright (c) 2026 Virelion Biotech. GPL-3.0-or-later. See `LICENSE` and `NOTICE`.
